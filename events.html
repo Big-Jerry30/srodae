@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="color-scheme" content="light">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Stay updated with upcoming programs, services, and activities at Church of Pentecost - New Juaben District.">
+    <title>Events - Church of Pentecost | New Juaben District</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/cop_logo.png" alt="COP Logo">
+                <span>New Juaben District</span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link">About</a>
+                <a href="ministries.html" class="nav-link">Ministries</a>
+                <a href="events.html" class="nav-link active">Events</a>
+                <a href="sermons.html" class="nav-link">Sermons</a>
+
+                <a href="contact.html" class="nav-link">Contact</a>
+
+            </nav>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <section class="hero" style="min-height: 400px;">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Upcoming Events</h1>
+                <p class="lead">Join us for special services, programs, and activities</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>District Calendar</h2>
+                <p class="lead">Mark your calendars for our upcoming district events</p>
+            </div>
+
+            <div class="grid grid-2" id="publicEventsContainer">
+                <div style="text-align:center; padding: 2rem; grid-column: 1/-1;">
+                    <p>Loading events...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('api/events.php?action=public');
+                const result = await response.json();
+                const container = document.getElementById('publicEventsContainer');
+
+                if (result.success && result.data.length > 0) {
+                    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+                    container.innerHTML = result.data.map(event => {
+                        const eventDate = new Date(event.event_date);
+                        const day = eventDate.getDate().toString().padStart(2, '0');
+                        const month = months[eventDate.getMonth()];
+                        const year = eventDate.getFullYear();
+
+                        const imageHtml = event.image_url
+                            ? `<div style="margin-bottom: 1rem; width: 100%; border-radius: var(--radius-lg); overflow: hidden;">
+                                   <img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: auto; display: block; object-fit: cover;">
+                               </div>`
+                            : '';
+
+                        return `
+                        <div class="card">
+                            ${imageHtml}
+                            <div class="card-body">
+                                <div style="display: flex; gap: 1rem; align-items: start;">
+                                    <div style="background: var(--primary-navy); color: white; padding: 1rem; border-radius: var(--radius-lg); text-align: center; min-width: 80px;">
+                                        <div style="font-size: 2rem; font-weight: 700; line-height: 1;">${day}</div>
+                                        <div style="font-size: 0.875rem; opacity: 0.9;">${month} ${year}</div>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h4>${event.title}</h4>
+                                        <p class="text-muted mb-2">${event.description || ''}</p>
+                                        <p class="text-small mb-1"><strong>Venue:</strong> ${event.venue || 'TBD'}</p>
+                                        <p class="text-small"><strong>Time:</strong> ${event.event_time || 'TBD'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding: 2rem; grid-column: 1/-1;"><p>No upcoming events at this time.</p></div>';
+                }
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                document.getElementById('publicEventsContainer').innerHTML = '<div style="text-align:center; padding: 2rem; grid-column: 1/-1; color: red;"><p>Failed to load events. Please try again later.</p></div>';
+            }
+        });
+    </script>
+    </div>
+    </section>
+
+    <section class="section bg-light">
+        <div class="container text-center">
+            <h2>Never Miss an Event</h2>
+            <p class="lead" style="max-width: 600px; margin: 0 auto var(--spacing-xl);">
+                We frequently host revivals, all-night prayer services, and community outreach. Don't miss out on what
+                God is doing!
+            </p>
+            <a href="contact.html" class="btn btn-primary btn-lg">Contact Us for Details</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Church of Pentecost</h3>
+                    <p>New Juaben District</p>
+                    <p>Empowering lives through faith, fellowship, and service since 1970.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="about.html">About Us</a></p>
+                    <p><a href="ministries.html">Ministries</a></p>
+                    <p><a href="events.html">Events</a></p>
+                    <p><a href="sermons.html">Sermons</a></p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Main Street, Koforidua<br>Eastern Region, Ghana</p>
+                    <p>📞 +233 24 412 3456</p>
+                    <p>✉️ info@copnewjuaben.org</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Service Times</h3>
+                    <p><strong>Start The Week With Jesus</strong><br>Monday: 5:30 AM</p>
+                    <p><strong>Spiritual Clinic</strong><br>Friday: 9:00 PM</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Church of Pentecost - New Juaben District. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

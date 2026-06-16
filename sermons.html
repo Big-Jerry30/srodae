@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="color-scheme" content="light">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Listen to spirit-filled sermons and messages from Church of Pentecost - New Juaben District.">
+    <title>Sermons - Church of Pentecost | New Juaben District</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="images/cop_logo.png" alt="COP Logo">
+                <span>New Juaben District</span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link">About</a>
+                <a href="ministries.html" class="nav-link">Ministries</a>
+                <a href="events.html" class="nav-link">Events</a>
+                <a href="sermons.html" class="nav-link active">Sermons</a>
+
+                <a href="contact.html" class="nav-link">Contact</a>
+
+            </nav>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <section class="hero"
+        style="min-height: 400px; background: linear-gradient(rgba(10, 37, 88, 0.9), rgba(10, 37, 88, 0.9)), url('images/hero-bg.jpg') center/cover;">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Sermons & Messages</h1>
+                <p class="lead">Be blessed by our latest teachings and sermons</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Latest Sermons</h2>
+                <p class="lead">Catch up on recent teachings from our district leaders</p>
+            </div>
+
+            <div class="grid grid-3" id="publicSermonsContainer">
+                <div style="text-align:center; padding: 2rem; grid-column: 1/-1;">
+                    <p>Loading sermons...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('api/sermons.php?action=public');
+                const result = await response.json();
+                const container = document.getElementById('publicSermonsContainer');
+
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = result.data.map(sermon => {
+                        const sermonDate = new Date(sermon.sermon_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        let headerMedia = '';
+                        let bodyMedia = '';
+
+                        if (sermon.video_url) {
+                            if (sermon.video_url.includes('youtube.com') || sermon.video_url.includes('youtu.be')) {
+                                let videoId = '';
+                                if (sermon.video_url.includes('v=')) {
+                                    videoId = sermon.video_url.split('v=')[1].split('&')[0];
+                                } else if (sermon.video_url.includes('youtu.be/')) {
+                                    videoId = sermon.video_url.split('youtu.be/')[1].split('?')[0];
+                                }
+
+                                if (videoId) {
+                                    headerMedia = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width: 100%; aspect-ratio: 16/9; display: block;"></iframe>`;
+                                } else {
+                                    headerMedia = `<div style="background: var(--gray-200); height: 180px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🎬</div>`;
+                                    bodyMedia += `<a href="${sermon.video_url}" target="_blank" class="btn btn-outline btn-sm mt-3">🎬 Watch Video</a>`;
+                                }
+                            } else {
+                                headerMedia = `<video controls style="width: 100%; aspect-ratio: 16/9; background: #000; display: block;">
+                                    <source src="${sermon.video_url}" type="video/mp4">
+                                </video>`;
+                            }
+                        } else {
+                            headerMedia = `<div style="background: var(--gray-200); height: 180px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🎧</div>`;
+                        }
+
+                        if (sermon.audio_url) {
+                            bodyMedia += `
+                            <div style="margin-top: 1rem; width: 100%;">
+                                <audio controls style="width: 100%; height: 40px; outline: none;">
+                                    <source src="${sermon.audio_url}" type="audio/mpeg">
+                                </audio>
+                            </div>`;
+                        }
+
+                        if (!sermon.video_url && !sermon.audio_url) {
+                            bodyMedia += `<span class="text-small text-muted mt-3" style="display:inline-block;">No media available</span>`;
+                        }
+
+                        return `
+                        <div class="card" style="overflow: hidden;">
+                            ${headerMedia}
+                            <div class="card-body">
+                                <h4 class="card-title">${sermon.title}</h4>
+                                <p class="text-small text-muted mb-2"><strong>Preacher:</strong> ${sermon.preacher}</p>
+                                <p class="text-small text-muted mb-3"><strong>Date:</strong> ${sermonDate}</p>
+                                <p class="card-text text-small">${sermon.description || (sermon.scripture_reference ? 'Scripture: ' + sermon.scripture_reference : '')}</p>
+                                ${bodyMedia}
+                            </div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding: 2rem; grid-column: 1/-1;"><p>No sermons available at this time.</p></div>';
+                }
+            } catch (error) {
+                console.error('Error fetching sermons:', error);
+                document.getElementById('publicSermonsContainer').innerHTML = '<div style="text-align:center; padding: 2rem; grid-column: 1/-1; color: red;"><p>Failed to load sermons. Please try again later.</p></div>';
+            }
+        });
+    </script>
+    </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Church of Pentecost</h3>
+                    <p>New Juaben District</p>
+                    <p>Empowering lives through faith, fellowship, and service since 1970.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="about.html">About Us</a></p>
+                    <p><a href="ministries.html">Ministries</a></p>
+                    <p><a href="events.html">Events</a></p>
+                    <p><a href="sermons.html">Sermons</a></p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Main Street, Koforidua<br>Eastern Region, Ghana</p>
+                    <p>📞 +233 24 412 3456</p>
+                    <p>✉️ info@copnewjuaben.org</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Service Times</h3>
+                    <p><strong>Start The Week With Jesus</strong><br>Monday: 5:30 AM</p>
+                    <p><strong>Spiritual Clinic</strong><br>Friday: 9:00 PM</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Church of Pentecost - New Juaben District. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
